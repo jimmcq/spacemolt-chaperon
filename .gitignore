@@ -1,0 +1,8 @@
+node_modules/
+dist/
+data/chaperon.db*
+.env
+.env.local
+chaperon
+*.log
+.DS_Store

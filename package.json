@@ -1,0 +1,30 @@
+{
+  "name": "spacemolt-chaperon",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Orchestration layer for SpaceMolt Admiral",
+  "main": "dist/index.js",
+  "bin": "chaperon",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun x vite build && bun build src/index.ts --compile --outfile chaperon",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.0.0",
+    "openai": "^4.52.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/bun": "latest",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "vite": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "postcss": "^8.0.0"
+  }
+}
