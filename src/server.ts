@@ -100,12 +100,30 @@ export function createServer(orchestrator: Orchestrator) {
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
       margin-bottom: 40px;
+      align-items: stretch;
     }
     .card {
       background: #1a1a1a;
       border: 1px solid #333;
       border-radius: 8px;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .card-header {
+      flex-shrink: 0;
+    }
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid #333;
     }
     .card h2 {
       font-size: 18px;
@@ -200,17 +218,21 @@ export function createServer(orchestrator: Orchestrator) {
         const grid = document.getElementById('agents-grid')
         grid.innerHTML = agents.map(agent => \`
           <div class="card">
-            <h2>\${agent.name}</h2>
-            <p><strong>Directive:</strong> \${agent.directive || '(none)'}</p>
-            \${agent.todo ? \`
-              <div>
-                <strong style="font-size: 13px;">TODO:</strong>
-                <div class="todo-box">\${agent.todo}</div>
-              </div>
-            \` : '<p><strong>TODO:</strong> (none)</p>'}
-            <p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #333;">
+            <div class="card-header">
+              <h2>\${agent.name}</h2>
+              <p><strong>Directive:</strong> \${agent.directive || '(none)'}</p>
+            </div>
+            <div class="card-content">
+              \${agent.todo ? \`
+                <div style="margin-top: 8px;">
+                  <strong style="font-size: 13px;">TODO:</strong>
+                  <div class="todo-box">\${agent.todo}</div>
+                </div>
+              \` : '<p style="color: #666; font-size: 13px; margin-top: 8px;"><strong>TODO:</strong> (none)</p>'}
+            </div>
+            <div class="card-footer">
               <span class="badge status-online">connected</span>
-            </p>
+            </div>
           </div>
         \`).join('')
       } catch (error) {
