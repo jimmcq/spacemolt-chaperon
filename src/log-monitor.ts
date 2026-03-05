@@ -129,12 +129,15 @@ export class LogMonitor extends EventEmitter {
     const recentEntries: string[] = []
 
     for (const entry of this.buffer) {
+      if (!entry.type || !entry.timestamp) continue
       summary[entry.type] = (summary[entry.type] || 0) + 1
 
       // Keep last 10 entries as text
       if (recentEntries.length < 10) {
-        const timestamp = new Date(entry.timestamp).toLocaleTimeString()
-        recentEntries.push(`[${timestamp}] ${entry.type}: ${entry.title}`)
+        const ts = new Date(entry.timestamp)
+        if (isNaN(ts.getTime())) continue
+        const content = entry.content ? `: ${entry.content.slice(0, 80)}` : ''
+        recentEntries.push(`[${ts.toLocaleTimeString()}] ${entry.type}${content}`)
       }
     }
 

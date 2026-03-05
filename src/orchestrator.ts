@@ -114,9 +114,27 @@ export class Orchestrator {
   private async buildWorldSnapshot() {
     const snapshot: Record<string, any> = {}
 
+    // Refresh agent list to pick up new or replaced agents
+    const currentProfiles = await admiralClient.listProfiles()
+    const currentIds = new Set(currentProfiles.map((p) => p.id))
+
+    // Start monitors for any agents not yet tracked
+    for (const profile of currentProfiles) {
+      this.startMonitorForAgent(profile)
+    }
+
+    // Stop and remove monitors for agents that no longer exist
+    for (const [agentId, monitor] of this.monitors.entries()) {
+      if (!currentIds.has(agentId)) {
+        monitor.stop()
+        this.monitors.delete(agentId)
+        console.log(`[Orchestrator] Removed monitor for departed agent ${agentId}`)
+      }
+    }
+
     this.agentNameToId.clear()
     for (const [agentId, monitor] of this.monitors.entries()) {
-      const agent = await admiralClient.getProfile(agentId)
+      const agent = currentProfiles.find((p) => p.id === agentId)
       if (!agent) continue
 
       this.agentNameToId.set(agent.name, agent.id)

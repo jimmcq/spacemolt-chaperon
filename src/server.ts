@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { streamSSE } from 'hono/streaming'
 import { getDecisionLog, getAllMemories, getLastCycleNumber, getHumanGoals, setHumanGoals } from './db'
 import { admiralClient } from './admiral-client'
 import { Orchestrator } from './orchestrator'
@@ -37,8 +38,7 @@ export function createServer(orchestrator: Orchestrator) {
   })
 
   app.get('/api/decisions/stream', (c) => {
-    // Server-sent events for decision log streaming
-    return c.streamText(async (write) => {
+    return streamSSE(c, async (stream) => {
       let lastCycle = await getLastCycleNumber()
 
       while (true) {
@@ -46,14 +46,12 @@ export function createServer(orchestrator: Orchestrator) {
         if (newCycle > lastCycle) {
           const decisions = await getDecisionLog(1)
           if (decisions.length > 0) {
-            const decision = decisions[0]
-            await write(`data: ${JSON.stringify(decision)}\n\n`)
+            await stream.writeSSE({ data: JSON.stringify(decisions[0]) })
             lastCycle = newCycle
           }
         }
 
-        // Check every 5 seconds
-        await new Promise((resolve) => setTimeout(resolve, 5000))
+        await stream.sleep(5000)
       }
     })
   })
@@ -338,7 +336,7 @@ export function createServer(orchestrator: Orchestrator) {
             <div class="log-entry">
               <strong>Cycle \${d.cycle_number}</strong> @ \${new Date(d.cycle_ts).toLocaleTimeString()}
               <br><br>
-              <strong>Reasoning:</strong> \${d.reasoning.substring(0, 200)}...
+              <strong>Reasoning:</strong> \${d.reasoning}
               <br><br>
               <strong>Actions:</strong><br>
               \${actionsList || '(none)'}
