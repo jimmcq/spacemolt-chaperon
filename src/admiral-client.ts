@@ -93,28 +93,53 @@ export class AdmiralClient {
     const controller = new AbortController()
 
     const connect = () => {
-      const eventSource = new EventSource(`${this.baseUrl}/api/profiles/${id}/logs?stream=true`)
-
-      eventSource.addEventListener('log', (event) => {
-        try {
-          const entry = JSON.parse(event.data) as LogEntry
-          onEntry(entry)
-        } catch (e) {
-          console.error('Failed to parse log entry:', e)
-        }
+      fetch(`${this.baseUrl}/api/profiles/${id}/logs?stream=true`, {
+        signal: controller.signal,
       })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to stream logs: ${response.statusText}`)
+          }
 
-      eventSource.addEventListener('error', () => {
-        eventSource.close()
-        // Attempt reconnect in 5 seconds if not aborted
-        if (!controller.signal.aborted) {
-          setTimeout(connect, 5000)
-        }
-      })
+          const reader = response.body?.getReader()
+          if (!reader) {
+            throw new Error('Response body is not readable')
+          }
 
-      controller.signal.addEventListener('abort', () => {
-        eventSource.close()
-      })
+          const decoder = new TextDecoder()
+          let buffer = ''
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split('\n')
+            buffer = lines.pop() || ''
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const entry = JSON.parse(line.slice(6)) as LogEntry
+                  onEntry(entry)
+                } catch (e) {
+                  console.error('Failed to parse log entry:', e)
+                }
+              }
+            }
+          }
+        })
+        .catch((error) => {
+          if (error instanceof Error && error.name === 'AbortError') {
+            // Normal abort, don't retry
+            return
+          }
+          onError?.(error instanceof Error ? error : new Error(String(error)))
+          // Attempt reconnect in 5 seconds if not aborted
+          if (!controller.signal.aborted) {
+            setTimeout(connect, 5000)
+          }
+        })
     }
 
     connect()
