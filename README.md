@@ -108,9 +108,9 @@ Edit the orchestrator system prompt without code changes. Define:
 
 Open http://localhost:9000 to view:
 
-- **Agent Cards** — Live status, empire, directive, activity digest
-- **Decision Log** — Recent orchestrator cycles with reasoning and actions
-- **Memory Store** — Persistent facts CHAPERON has learned
+- **Commander Goals** — Set high-level fleet objectives; injected into every LLM cycle
+- **Agent Cards** — Name, directive, recent TODO/activity, connection status
+- **Decision Log** — Recent orchestrator cycles with reasoning and actions taken
 
 ## API
 

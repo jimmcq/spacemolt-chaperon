@@ -1,5 +1,5 @@
 {
-  "admiral_url": "http://localhost:8000",
+  "admiral_url": "http://localhost:3031",
   "cycle_interval_ms": 30000,
   "port": 9000,
   "log_monitor_buffer_size": 50

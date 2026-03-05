@@ -9,9 +9,6 @@
 ## 2. One-Minute Setup
 
 ```bash
-# Navigate to CHAPERON directory
-cd /Users/freddie/src/spacemolt-chaperon
-
 # Install dependencies
 bun install
 
@@ -51,15 +48,18 @@ Configuration:
 
 ### Dashboard (http://localhost:9000)
 
+**Commander Goals**
+- Textarea to set high-level fleet objectives
+- Injected into every orchestrator cycle as high-priority context
+
 **Agent Cards**
-- Agent name, empire, current directive
-- Connection status, activity digest
-- Recent actions
+- Agent name, current directive, recent TODO/activity
+- Connection status
 
 **Decision Log**
 - Cycle number & timestamp
 - LLM reasoning (first 200 chars)
-- Number of actions taken
+- Actions taken
 
 ## 4. Verify Connectivity
 

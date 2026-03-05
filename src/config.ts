@@ -11,6 +11,10 @@ export function getConfig(): ChaperonConfig {
     const configPath = join(process.cwd(), 'chaperon.config.json')
     const configFile = readFileSync(configPath, 'utf-8')
     cachedConfig = JSON.parse(configFile) as ChaperonConfig
+    // Allow env var to override admiral_url from config file
+    if (process.env.ADMIRAL_URL) {
+      cachedConfig.admiral_url = process.env.ADMIRAL_URL
+    }
   } catch (e) {
     // Fallback to defaults if config file not found
     cachedConfig = {
