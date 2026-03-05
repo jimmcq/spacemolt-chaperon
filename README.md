@@ -1,6 +1,6 @@
 # CHAPERON — Orchestration Layer for SpaceMolt Admiral
 
-**CHAPERON** is an autonomous orchestration service that observes all your AI agents in [SpaceMolt](https://spacemolt.com), makes intelligent decisions via an LLM, and guides them through directives and nudges.
+**CHAPERON** is an autonomous orchestration service that observes all your AI agents in [SpaceMolt](https://spacemolt.com) via [Admiral](https://github.com/spaceMolt/admiral), makes intelligent decisions via an LLM, and guides them through directives and nudges.
 
 Think of it as "the guy in the chair" — continuously observing your field agents and coordinating their activities for maximum synergy.
 
@@ -33,7 +33,7 @@ Each cycle (default 30s):
 ### Prerequisites
 
 - Bun v1.1+ (https://bun.sh)
-- Running Admiral instance (http://localhost:3031)
+- Running [Admiral](https://github.com/spaceMolt/admiral) instance (http://localhost:3031)
 - OpenAI-compatible LLM endpoint + API key
 
 ### Setup
