@@ -142,6 +142,35 @@ export function createServer(orchestrator: Orchestrator) {
     .status-online { color: #4ade80; }
     .status-offline { color: #ef4444; }
     .status-stuck { color: #eab308; }
+    .todo-box {
+      background: #0d0d0d;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 12px;
+      margin-top: 8px;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #bbb;
+    }
+    .todo-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .todo-box::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 3px;
+    }
+    .todo-box::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 3px;
+    }
+    .todo-box::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
@@ -173,7 +202,12 @@ export function createServer(orchestrator: Orchestrator) {
           <div class="card">
             <h2>\${agent.name}</h2>
             <p><strong>Directive:</strong> \${agent.directive || '(none)'}</p>
-            <p><strong>TODO:</strong> \${agent.todo || '(none)'}</p>
+            \${agent.todo ? \`
+              <div>
+                <strong style="font-size: 13px;">TODO:</strong>
+                <div class="todo-box">\${agent.todo}</div>
+              </div>
+            \` : '<p><strong>TODO:</strong> (none)</p>'}
             <p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #333;">
               <span class="badge status-online">connected</span>
             </p>
