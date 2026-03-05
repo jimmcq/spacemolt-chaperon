@@ -17,8 +17,8 @@ export class AdmiralClient {
       const profiles = (await response.json()) as Profile[]
       return profiles.map((p) => ({
         ...p,
-        connected: true,
-        running: true,
+        connected: p.connected ?? true,
+        running: p.running ?? true,
       }))
     } catch (error) {
       console.error('Error listing profiles:', error)

@@ -304,7 +304,7 @@ export function createServer(orchestrator: Orchestrator) {
               \` : '<p style="color: #666; font-size: 13px; margin-top: 8px;"><strong>TODO:</strong> (none)</p>'}
             </div>
             <div class="card-footer">
-              <span class="badge status-online">connected</span>
+              <span class="badge \${agent.connected ? 'status-online' : 'status-offline'}">\${agent.connected ? 'connected' : 'disconnected'}</span>
             </div>
           </div>
         \`).join('')
