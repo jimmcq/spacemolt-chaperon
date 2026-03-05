@@ -17,6 +17,7 @@ export class Orchestrator {
   private cycleNumber = 0
   private running = false
   private wakeupSignal: AbortController | null = null
+  private agentNameToId: Map<string, string> = new Map()
 
   constructor() {
     this.cycleInterval = getConfig().cycle_interval_ms
@@ -112,10 +113,12 @@ export class Orchestrator {
   private async buildWorldSnapshot() {
     const snapshot: Record<string, any> = {}
 
+    this.agentNameToId.clear()
     for (const [agentId, monitor] of this.monitors.entries()) {
       const agent = await admiralClient.getProfile(agentId)
       if (!agent) continue
 
+      this.agentNameToId.set(agent.name, agent.id)
       snapshot[agent.name] = {
         id: agent.id,
         empire: agent.empire,
@@ -273,20 +276,41 @@ MAKE YOUR DECISION: Observe the world state above. Decide whether to nudge agent
       tools,
     )
 
+    if (!completion) {
+      console.error('[Orchestrator] LLM returned undefined completion')
+      return { reasoning: 'LLM returned invalid response', actions: [] }
+    }
+
     // Extract reasoning and tool calls
     let reasoning = 'No reasoning provided'
     const actions: OrchestratorAction[] = []
 
-    for (const content of completion.content) {
-      if (content.type === 'text') {
-        reasoning = content.text
+    // Handle both standard OpenAI format and NVIDIA GLM format
+    const message = (completion.choices?.[0]?.message) || (completion as any)
+
+    // GLM format has reasoning_content field, standard format has content array
+    if (message.reasoning_content) {
+      reasoning = message.reasoning_content
+    } else if (Array.isArray((message as any).content)) {
+      for (const content of (message as any).content) {
+        if (content.type === 'text') {
+          reasoning = content.text
+        }
       }
+    } else if (typeof message.content === 'string' && message.content) {
+      reasoning = message.content
     }
 
-    if (completion.tool_calls) {
-      for (const toolCall of completion.tool_calls) {
+    // Tool calls can be at message level (GLM) or completion level (OpenAI)
+    const toolCalls = message.tool_calls || (completion as any).tool_calls
+
+    if (toolCalls) {
+      for (const toolCall of toolCalls) {
         if (toolCall.type === 'function') {
-          const args = toolCall.function.arguments as any
+          // Handle both string and object arguments
+          const args = typeof toolCall.function.arguments === 'string'
+            ? JSON.parse(toolCall.function.arguments)
+            : toolCall.function.arguments
 
           switch (toolCall.function.name) {
             case 'nudge_agent':
@@ -344,18 +368,20 @@ MAKE YOUR DECISION: Observe the world state above. Decide whether to nudge agent
       try {
         switch (action.type) {
           case 'nudge_agent': {
-            const agentId = action.agent_id!
+            const agentName = action.agent_id!
+            const agentId = this.agentNameToId.get(agentName) || agentName
             const message = action.data.message as string
-            console.log(`  → nudge ${agentId}: "${message}"`)
+            console.log(`  → nudge ${agentName}: "${message}"`)
             await admiralClient.sendNudge(agentId, message)
             agentsObserved.add(agentId)
             break
           }
 
           case 'set_directive': {
-            const agentId = action.agent_id!
+            const agentName = action.agent_id!
+            const agentId = this.agentNameToId.get(agentName) || agentName
             const directive = action.data.directive as string
-            console.log(`  → set_directive ${agentId}: "${directive}"`)
+            console.log(`  → set_directive ${agentName}: "${directive}"`)
             await admiralClient.updateDirective(agentId, directive)
             agentsObserved.add(agentId)
             break

@@ -123,7 +123,12 @@ export class AdmiralClient {
                   const entry = JSON.parse(line.slice(6)) as LogEntry
                   onEntry(entry)
                 } catch (e) {
-                  console.error('Failed to parse log entry:', e)
+                  // Silently skip incomplete JSON (happens when data arrives in chunks)
+                  // Only log if it looks like a complete but malformed JSON object
+                  const json = line.slice(6)
+                  if (json.endsWith('}') || json.endsWith(']')) {
+                    console.error('Failed to parse log entry:', e)
+                  }
                 }
               }
             }

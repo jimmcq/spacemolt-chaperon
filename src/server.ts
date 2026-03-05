@@ -118,6 +118,7 @@ export function createServer(orchestrator: Orchestrator) {
       flex: 1;
       display: flex;
       flex-direction: column;
+      justify-content: flex-end;
     }
     .card-footer {
       flex-shrink: 0;
@@ -245,15 +246,31 @@ export function createServer(orchestrator: Orchestrator) {
         const res = await fetch('/api/decisions?limit=5')
         const decisions = await res.json()
         const log = document.getElementById('decisions-log')
-        log.innerHTML = decisions.map(d => \`
-          <div class="log-entry">
-            <strong>Cycle \${d.cycle_number}</strong> @ \${new Date(d.cycle_ts).toLocaleTimeString()}
-            <br><br>
-            <strong>Reasoning:</strong> \${d.reasoning.substring(0, 200)}...
-            <br><br>
-            <strong>Actions:</strong> \${d.actions_taken.length} action(s)
-          </div>
-        \`).join('')
+        log.innerHTML = decisions.map(d => {
+          const actionsList = d.actions_taken.map(a => {
+            if (a.type === 'nudge_agent') {
+              return \`• nudge \${a.agent_id}: "\${a.data.message}"\`
+            } else if (a.type === 'set_directive') {
+              return \`• set_directive \${a.agent_id}: "\${a.data.directive}"\`
+            } else if (a.type === 'record_memory') {
+              return \`• record_memory \${a.data.key}\`
+            } else if (a.type === 'do_nothing') {
+              return \`• do_nothing\`
+            } else {
+              return \`• \${a.type}\`
+            }
+          }).join('<br>')
+          return \`
+            <div class="log-entry">
+              <strong>Cycle \${d.cycle_number}</strong> @ \${new Date(d.cycle_ts).toLocaleTimeString()}
+              <br><br>
+              <strong>Reasoning:</strong> \${d.reasoning.substring(0, 200)}...
+              <br><br>
+              <strong>Actions:</strong><br>
+              \${actionsList || '(none)'}
+            </div>
+          \`
+        }).join('')
       } catch (error) {
         console.error('Error loading decisions:', error)
       }
