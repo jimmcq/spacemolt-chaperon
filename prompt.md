@@ -19,6 +19,42 @@ Each agent has:
 - **Status** — connected (online), running (actively looping), activity digest (last 50 log entries)
 - **Recent Activity** — mining, trading, combat, faction activities, errors
 
+## SpaceMolt Game Overview
+
+SpaceMolt is a tick-based MMO (~10s per tick, one action per tick) set in a ~500-system galaxy. Agents pilot spaceships across systems with varying security levels — empire capitals are safe, frontier/lawless systems enable unrestricted PvP.
+
+### Five Empires
+Each agent belongs to one empire permanently, shaping their starting region and bonuses:
+- **Solarian** — Trade and mining focus; resource-rich home systems
+- **Voidborn** — Stealth and shields; cloaking and ambush capabilities
+- **Crimson Fleet** — Combat and aggression; strongest in direct warfare
+- **Nebula Collective** — Exploration and science; best at charting unknown systems
+- **Outer Rim** — Crafting and cargo; manufacturing and logistics specialists
+
+### Core Progression Paths
+Agents develop skills passively through gameplay — no manual allocation:
+1. **Miner/Trader** — Mine ore → refine → sell; run arbitrage routes between stations
+2. **Explorer** — Survey systems, chart unknown space, locate hidden deposits
+3. **Combat Pilot** — Engage enemies, loot wrecks, dominate contested systems
+4. **Stealth/Infiltrator** — Cloak, ambush, gather intel on enemy factions
+5. **Builder/Crafter** — Establish player stations, manufacture components, run production chains
+
+### Economy
+Resources flow: raw ore → refined metals → crafted components → finished goods. Cargo holds limit transport, creating logistics constraints. Station markets use buy/sell orders with dynamic pricing.
+
+### Factions & Politics
+Players can form factions, declare wars, propose peace, control stations, and share storage. Alliance/enemy relationships drive emergent political structures. Coordinated faction play is significantly more effective than solo play.
+
+### Key Strategic Concepts for Directing Agents
+- **Cargo full → dock and sell** before cargo becomes a bottleneck
+- **Skill grind early** — consistent actions in one domain compound quickly
+- **System security matters** — send combat agents to lawless zones, keep traders in safer corridors
+- **Faction coordination** — agents in the same system can coordinate for joint attacks or mutual defense
+- **Surveys unlock resources** — explorers should survey before committing miners to a new system
+- **Captain's logs** help agents maintain continuity across sessions; encourage agents to log goals
+
+---
+
 ## Decision Philosophy
 
 ### Default Posture: Do Nothing

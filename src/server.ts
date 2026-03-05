@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { getDecisionLog, getAllMemories, getLastCycleNumber } from './db'
+import { getDecisionLog, getAllMemories, getLastCycleNumber, getHumanGoals, setHumanGoals } from './db'
 import { admiralClient } from './admiral-client'
 import { Orchestrator } from './orchestrator'
 
@@ -61,6 +61,17 @@ export function createServer(orchestrator: Orchestrator) {
   app.get('/api/memories', async (c) => {
     const memories = await getAllMemories()
     return c.json(memories)
+  })
+
+  app.get('/api/goals', async (c) => {
+    const goals = await getHumanGoals()
+    return c.json({ goals })
+  })
+
+  app.post('/api/goals', async (c) => {
+    const { goals } = await c.req.json<{ goals: string }>()
+    await setHumanGoals(goals ?? '')
+    return c.json({ ok: true })
   })
 
   // Default route: serve frontend
@@ -190,12 +201,75 @@ export function createServer(orchestrator: Orchestrator) {
     .todo-box::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+    .goals-section {
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .goals-section h2 {
+      font-size: 16px;
+      color: #e0e0e0;
+      margin-bottom: 10px;
+    }
+    .goals-section p {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .goals-textarea {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 10px 12px;
+      resize: vertical;
+      min-height: 80px;
+      outline: none;
+    }
+    .goals-textarea:focus {
+      border-color: #00d4ff;
+    }
+    .goals-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .save-btn {
+      background: #00d4ff;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .save-btn:hover { background: #00b8d9; }
+    .save-btn:disabled { background: #444; color: #888; cursor: default; }
+    .save-status { font-size: 13px; color: #666; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>⚙️ CHAPERON</h1>
     <p style="margin-bottom: 30px; color: #666;">Orchestration layer for SpaceMolt agents</p>
+
+    <div class="goals-section">
+      <h2>Commander Goals</h2>
+      <p>Set high-level objectives for the fleet. CHAPERON will use these to guide agent decisions each cycle.</p>
+      <textarea class="goals-textarea" id="goals-input" placeholder="e.g. Focus on building up credits. Prioritize mining and trading. Avoid combat for now."></textarea>
+      <div class="goals-footer">
+        <button class="save-btn" id="save-goals-btn">Save</button>
+        <span class="save-status" id="save-status"></span>
+      </div>
+    </div>
 
     <h2 style="margin-bottom: 20px; font-size: 20px;">Connected Agents</h2>
     <div class="grid" id="agents-grid">
@@ -276,6 +350,40 @@ export function createServer(orchestrator: Orchestrator) {
       }
     }
 
+    async function loadGoals() {
+      try {
+        const res = await fetch('/api/goals')
+        const { goals } = await res.json()
+        document.getElementById('goals-input').value = goals || ''
+      } catch (error) {
+        console.error('Error loading goals:', error)
+      }
+    }
+
+    async function saveGoals() {
+      const btn = document.getElementById('save-goals-btn')
+      const status = document.getElementById('save-status')
+      const goals = document.getElementById('goals-input').value
+      btn.disabled = true
+      status.textContent = 'Saving...'
+      try {
+        await fetch('/api/goals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ goals }),
+        })
+        status.textContent = 'Saved ✓'
+        setTimeout(() => { status.textContent = '' }, 2000)
+      } catch (error) {
+        status.textContent = 'Error saving'
+      } finally {
+        btn.disabled = false
+      }
+    }
+
+    document.getElementById('save-goals-btn').addEventListener('click', saveGoals)
+
+    loadGoals()
     loadAgents()
     loadDecisions()
 

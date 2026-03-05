@@ -99,13 +99,22 @@ export async function getMemory(key: string): Promise<Memory | null> {
 export async function getAllMemories(): Promise<Memory[]> {
   const database = await getDb()
   try {
-    const stmt = database.prepare('SELECT * FROM memories ORDER BY importance DESC')
+    const stmt = database.prepare("SELECT * FROM memories WHERE key != '__human_goals__' ORDER BY importance DESC")
     const results = stmt.all() as Memory[]
     return results || []
   } catch (error) {
     console.error('Error getting all memories:', error)
     return []
   }
+}
+
+export async function getHumanGoals(): Promise<string> {
+  const memory = await getMemory('__human_goals__')
+  return memory?.value ?? ''
+}
+
+export async function setHumanGoals(goals: string): Promise<void> {
+  await insertMemory('__human_goals__', goals, 10)
 }
 
 export async function deleteMemory(key: string): Promise<void> {

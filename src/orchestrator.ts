@@ -6,6 +6,7 @@ import { LogMonitor } from './log-monitor'
 import {
   insertMemory,
   getAllMemories,
+  getHumanGoals,
   insertDecisionLog,
   getLastCycleNumber,
 } from './db'
@@ -137,6 +138,7 @@ export class Orchestrator {
   private async decide(snapshot: Record<string, any>) {
     const systemPrompt = getPrompt()
     const memories = await getAllMemories()
+    const humanGoals = await getHumanGoals()
 
     const memoryContext = memories
       .map((m) => `[${m.key}] ${m.value}`)
@@ -166,7 +168,11 @@ ${worldSummary}
 REMEMBERED FACTS
 ────────────────
 ${memoryContext || '(no memories yet)'}
-
+${humanGoals ? `
+COMMANDER GOALS (set by human operator — treat as high priority)
+────────────────────────────────────────────────────────────────
+${humanGoals}
+` : ''}
 MAKE YOUR DECISION: Observe the world state above. Decide whether to nudge agents, update directives, record memories, or do nothing. Use your tools to execute actions.
 `
 
