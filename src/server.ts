@@ -172,9 +172,8 @@ export function createServer(orchestrator: Orchestrator) {
         grid.innerHTML = agents.map(agent => \`
           <div class="card">
             <h2>\${agent.name}</h2>
-            <p><strong>Empire:</strong> <span class="badge">\${agent.empire}</span></p>
-            <p><strong>Model:</strong> \${agent.model}</p>
             <p><strong>Directive:</strong> \${agent.directive || '(none)'}</p>
+            <p><strong>TODO:</strong> \${agent.todo || '(none)'}</p>
             <p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #333;">
               <span class="badge status-online">connected</span>
             </p>
